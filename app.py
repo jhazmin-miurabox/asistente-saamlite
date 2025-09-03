@@ -45,6 +45,23 @@ qa_chain = RetrievalQA.from_chain_type(
 classifier = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
 
 
+def es_saludo(texto: str) -> bool:
+    """Detecta si el texto es un saludo simple."""
+    if not texto:
+        return False
+    texto = texto.strip().lower()
+    saludos = (
+        "hola",
+        "buenos dias",
+        "buenos días",
+        "buenas tardes",
+        "buenas noches",
+        "hi",
+        "hello",
+    )
+    return any(texto.startswith(s) for s in saludos)
+
+
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
     template="""
@@ -97,7 +114,10 @@ def ayuda():
     if not pregunta:
         return jsonify({"response": "Por favor, proporciona una pregunta válida."}), 400
 
- 
+    if es_saludo(pregunta):
+        return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
+
+
     # --- Filtro temático ---
     filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
     try:
