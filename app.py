@@ -89,6 +89,7 @@ def es_tema_seguro(texto: str) -> bool:
     return any(p in texto for p in palabras)
 
 
+
 def respuesta_crear_endoso(texto: str):
     """Proporciona una respuesta directa si el usuario pregunta cómo crear un endoso."""
     if not texto:
@@ -139,6 +140,7 @@ def respuesta_crear_poliza(texto: str):
         )
 
     return None
+
 
 
 def respuesta_crear_grupo(texto: str):
@@ -253,6 +255,7 @@ def respuesta_donde_ver(texto: str):
         return "Abre la póliza o endoso y entra a la sección 'Recibos' para verlos."
 
     return None
+
 
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
