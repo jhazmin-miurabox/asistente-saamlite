@@ -1,4 +1,20 @@
 
+Definicion de SAAM Lite:
+SAAM Lite es una plataforma gratuita y ligera creada por MiuraBox para ayudarte a gestionar tu cartera de seguros de manera eficiente. Te permite:
+
+• Registrar y mantener una base de datos completa de clientes y pólizas.
+• Consultar información de forma rápida y organizada.
+• Acceder desde cualquier dispositivo, ya que funciona en línea sin instalaciones.
+• Empezar sin costo y migrar fácilmente a la versión completa de SAAM una vez crezcas.
+
+SAAM Lite es ideal para agentes independientes, brokers pequeños o cualquier profesional que necesite una solución funcional y sin inversión inicial. 
+Además, si más adelante necesitas funciones avanzadas —como emisión de pólizas, automatización (RPA), lector de PDFs,
+buscador avanzado y soporte técnico— puedes dar el salto a la versión premium de SAAM en 
+https://saam.digital/
+
+
+--
+
 Instrucciones para Crear un Grupo:
 
    1. En el menú lateral, selecciona **'Grupos'**.
@@ -840,3 +856,86 @@ Instrucciones para Generar un Reporte de Renovaciones
       - Modifica cualquier filtro y vuelve a presionar **Generar Reporte** para refrescar los datos.
 
    ¡Listo! Con estos pasos podrás consultar y descargar tu reporte de renovaciones sin complicaciones.  
+
+
+--
+
+Instrucciones para Crear y Administrar Recibos en una Póliza o Endoso
+
+   **¿Qué es un recibo?**  
+   Un recibo es el documento que desglosa el monto a pagar (o que se ha pagado) en cada periodo de una póliza o endoso. Puedes generar varios recibos según la forma de pago (mensual, anual, etc.), editar sus montos o cambiar su estatus (ejemplo: pagado, cancelado).
+
+   ---
+
+   ### 1. **¿Cuándo se crean los recibos?**
+   - Cuando das de alta una póliza nueva o al emitir un endoso que implica cobro/devolución.
+   - Al convertir una OT a póliza.
+   - Si editas la forma de pago, la vigencia o los montos, los recibos se recalculan.
+
+   ---
+
+   ### 2. **Cómo crear los recibos automáticamente**
+
+   1. **Ingresa a la sección de Recibos**
+      - Dentro del formulario de póliza o endoso, ubica la sección llamada **“Recibos”**.
+
+   2. **Completa los datos principales**
+      - **Prima Neta**: Monto base asegurado.
+      - **Descuento**: Si aplica, indícalo y selecciona si es en pesos ($) o porcentaje (%).
+      - **RPF (Recargo Pago Fraccionado)**: Recargo por pago parcial, indica si es $ o %.
+      - **Derecho**: Derecho de póliza (gasto administrativo).
+      - **IVA**: Normalmente es 16%, pero puede variar según ramo.
+      - **Prima Total**: Se calcula automáticamente, puedes ajustarla si es necesario.
+
+   3. **Selecciona la frecuencia de pago**
+      - Elige la frecuencia: Mensual, Anual, Bimestral, etc.  
+         - El sistema calculará cuántos recibos se deben generar.
+
+      4. **Generar el primer recibo**
+         - Haz clic en **“Generar Primer Recibo”**.  
+         - El sistema te mostrará el cálculo prorrateado según la vigencia.
+         - Puedes editar algunos campos del primer recibo si el sistema lo permite.
+
+      5. **Calcular y generar todos los recibos**
+         - Cuando estés listo, haz clic en **“Calcular y Generar Recibos”**.  
+         - Se generará la lista completa, cada recibo con:  
+         - Serie (número consecutivo)  
+         - Periodo de vigencia (inicio y fin)  
+         - Monto (prima neta, RPF, derecho, IVA, prima total)  
+
+      6. **Revisa los recibos generados**
+         - Se mostrarán todos los recibos. Revisa fechas, montos y número de pagos.
+         - Si necesitas recalcular, ajusta la Prima Neta, montos o frecuencia y repite el proceso.
+
+      ---
+
+      ### 3. **Cómo cambiar el estatus de un recibo**
+
+      1. **Ir al detalle de la póliza o endoso**
+         - Haz clic sobre la póliza o endoso donde están los recibos que deseas administrar.
+
+      2. **Localiza la tabla de recibos**
+         - En la sección **“Recibos”** verás una tabla con todos los recibos generados.
+
+      3. **Editar o aplicar estatus**
+         - Haz clic sobre el recibo que deseas editar o busca el botón de “Editar” (ícono de lápiz).
+         - Se abrirá un formulario/modal donde puedes:
+         - Cambiar el **estatus** (Pagado, Cancelado, Pendiente de pago, etc.)
+         - Indicar la **fecha de pago**.
+         - Escribir observaciones si lo deseas.
+         - Guarda los cambios.
+
+         **Nota:** Si marcas un recibo como “Cancelado”, pueden cancelarse los futuros y la póliza también puede quedar anulada, según las reglas de tu sistema. Hazlo solo si estás seguro.
+
+      ---
+
+      ### 4. **Consejos y consideraciones**
+      - Si cambias la **forma de pago** después de crear recibos, deberás recalcularlos.
+      - El monto total de la prima (suma de todos los recibos) debe coincidir con el total de la póliza.
+      - Puedes exportar los recibos como parte del reporte de cobranza.
+      - Siempre revisa la vigencia y los montos antes de guardar.
+
+      ---
+
+      ¡Listo!  
+      Con estos pasos puedes generar, revisar y cambiar el estatus de los recibos asociados a una póliza o endoso.

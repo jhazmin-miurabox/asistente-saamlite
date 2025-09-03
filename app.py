@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify, render_template
 import pathlib
 import os
-
+from flask_cors import CORS
 # LangChain
 from flask.cli import load_dotenv
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
 
 # Cargar variables de entorno desde .env
 load_dotenv()
@@ -40,10 +41,49 @@ qa_chain = RetrievalQA.from_chain_type(
     return_source_documents=False   # pon True si quieres devolver las fuentes
 )
 
+# Clasificador de tema, usa gpt-3.5-turbo (más rápido y barato)
+classifier = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
+
+
+ALLOWED_TOPICS_PROMPT = PromptTemplate(
+    input_variables=["question"],
+    template="""
+Eres un filtro de seguridad para un asistente integrado en un CRM que gestiona pólizas de seguro y endosos.
+Debes analizar la pregunta del usuario y decidir si corresponde a alguno de los temas permitidos.
+
+✅ **Temas permitidos**
+- Funcionamiento y uso de la plataforma SAAM Lite (o la plataforma del usuario)
+- Gestión de pólizas de seguro, coberturas, endosos, siniestros, **recibos / notas de crédito** y cobranza
+- Consultas sobre agentes de seguros, clientes, reportes (pólizas, renovaciones, recibos), facturación y renovaciones
+- Temas de seguros en general (auto, vida, gastos médicos)
+
+❌ **Temas NO permitidos**
+Cualquier asunto que no encaje en la lista anterior (por ejemplo: cultura general, deportes, geografía, etc.).
+
+**Instrucciones de salida**
+- Devuelve **solo** la palabra `permitido` si la pregunta corresponde a un tema autorizado.
+- Devuelve **solo** la palabra `rechazado` si la pregunta no está permitida.
+
+### Ejemplos
+Pregunta: "¿Cómo genero los recibos de una póliza con pago trimestral?"  
+Respuesta esperada: permitido
+
+Pregunta: "¿Cuál es la capital de Francia?"  
+Respuesta esperada: rechazado
+
+Pregunta: "Muéstrame el reporte de cobranza de marzo"  
+Respuesta esperada: permitido
+
+Pregunta del usuario:
+{question}
+"""
+)
+
 # --------------------------------------------------
 # Flask
 # --------------------------------------------------
 app = Flask(__name__)
+CORS(app) 
 
 @app.route("/")
 def index():
@@ -57,6 +97,18 @@ def ayuda():
     if not pregunta:
         return jsonify({"response": "Por favor, proporciona una pregunta válida."}), 400
 
+ 
+    # --- Filtro temático ---
+    filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
+    try:
+        filtro_resp = classifier.predict(filtro_prompt).strip().lower()
+        if filtro_resp != "permitido":
+            return jsonify({"response": "Lo siento, solo puedo ayudarte con temas relacionados a la plataforma, pólizas de seguro, endosos o coberturas. ¿Te gustaría preguntar algo sobre estos temas?"}), 200
+    except Exception as e:
+        # Si el filtro falla, NO respondas la pregunta por seguridad
+        return jsonify({"response": "Ocurrió un error en el filtro de temas. Intenta de nuevo."}), 500
+
+    # --- Si sí es permitido, consulta el vectorstore ---
     try:
         result = qa_chain({"query": pregunta})
         return jsonify({"response": result["result"].strip()})
@@ -64,5 +116,5 @@ def ayuda():
         return jsonify({"response": f"Ocurrió un error al procesar la solicitud: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    # Usa host y puerto según tu despliegue; debug=True solo en desarrollo
     app.run(debug=True)
+
