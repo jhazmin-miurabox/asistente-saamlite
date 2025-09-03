@@ -34,11 +34,21 @@ vector_db  = FAISS.load_local(
 retriever = vector_db.as_retriever(search_kwargs={"k": 4})  # top-4 trozos relevantes
 llm       = ChatOpenAI(temperature=0, model="gpt-4.1-mini", api_key=OPENAI_API_KEY)
 
+QA_PROMPT = PromptTemplate(
+    input_variables=["context", "question"],
+    template=(
+        "Eres un asistente de seguros. Usa el contexto para responder de forma breve, "
+        "en máximo tres oraciones, y mantén solo la información esencial. "
+        "Incluye enlaces si aparecen en el contexto.\n\nContexto:\n{context}\n\nPregunta: {question}\n\nRespuesta:"
+    ),
+)
+
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
     retriever=retriever,
-    return_source_documents=False   # pon True si quieres devolver las fuentes
+    return_source_documents=False,  # pon True si quieres devolver las fuentes
+    chain_type_kwargs={"prompt": QA_PROMPT},
 )
 
 # Clasificador de tema, usa gpt-3.5-turbo (más rápido y barato)
