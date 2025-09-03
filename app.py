@@ -147,6 +147,7 @@ def ayuda():
         except Exception as inner_e:
             return jsonify({"response": f"Ocurrió un error al procesar la solicitud: {str(inner_e)}"}), 500
 
+
 if __name__ == "__main__":
     app.run(debug=True)
 
