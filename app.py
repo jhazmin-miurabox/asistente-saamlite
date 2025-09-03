@@ -88,7 +88,6 @@ def es_tema_seguro(texto: str) -> bool:
     )
     return any(p in texto for p in palabras)
 
-
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
     template="""
@@ -167,6 +166,7 @@ def ayuda():
             )
         }), 200
 
+
     # --- Si sí es permitido, consulta el vectorstore ---
     try:
         result = qa_chain({"query": pregunta})
@@ -180,6 +180,7 @@ def ayuda():
             return jsonify({"response": llm.invoke(pregunta).content.strip()})
         except Exception as inner_e:
             return jsonify({"response": f"Ocurrió un error al procesar la solicitud: {str(inner_e)}"}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
