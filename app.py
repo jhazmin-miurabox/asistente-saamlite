@@ -88,6 +88,58 @@ def es_tema_seguro(texto: str) -> bool:
     )
     return any(p in texto for p in palabras)
 
+
+def respuesta_crear_endoso(texto: str):
+    """Proporciona una respuesta directa si el usuario pregunta cómo crear un endoso."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    claves = (
+        "crear endoso",
+        "crear un endoso",
+        "nuevo endoso",
+        "generar endoso",
+        "alta de endoso",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para crear un endoso, primero abre la póliza vigente y en la sección Opciones selecciona "
+            "\"Crear Endoso\". Luego, elige el tipo de endoso (A, B o D), selecciona el concepto, "
+            "define la vigencia, completa el formulario correspondiente y, si aplica, genera los recibos o notas "
+            "de crédito. Finalmente, revisa los datos y guarda el endoso para que se aplique en la póliza."
+        )
+
+    return None
+
+
+def respuesta_crear_poliza(texto: str):
+    """Proporciona una respuesta directa si el usuario pregunta cómo crear una póliza."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    claves = (
+        "crear poliza",
+        "crear póliza",
+        "nueva poliza",
+        "nueva póliza",
+        "alta de poliza",
+        "alta de póliza",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para crear una póliza:\n"
+            "1. Ve al módulo Pólizas y elige 'Nueva Póliza'.\n"
+            "2. Completa el formulario correspondiente.\n"
+            "3. Guarda para finalizar. También puedes ir al formulario en "
+            "http://pruebas.localhost:3000/formulario-polizas"
+        )
+
+    return None
+
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
     template="""
@@ -142,6 +194,10 @@ def ayuda():
 
     if es_saludo(pregunta):
         return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
+
+    direct = respuesta_crear_endoso(pregunta)
+    if direct:
+        return jsonify({"response": direct}), 200
 
     direct = respuesta_crear_poliza(pregunta)
     if direct:
