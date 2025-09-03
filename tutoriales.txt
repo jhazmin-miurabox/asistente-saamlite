@@ -13,34 +13,25 @@ buscador avanzado y soporte técnico— puedes dar el salto a la versión premiu
 https://saam.digital/
 
 
+Guía rápida para crear una póliza:
+1. Ve al módulo [Pólizas](/polizas) y elige **"Nueva Póliza"**.
+2. [Haz clic aquí](/formulario-polizas) para ir directo al formulario.
+3. Guarda para finalizar.
+
 --
 
 Instrucciones para Crear un Grupo:
-
-   1. En el menú lateral, selecciona **'Grupos'**.
-
-   2. En la sección de Grupos, haz clic en el botón **'Nuevo Grupo'**.
-
-   3. Se abrirá un formulario para crear el grupo. Completa los siguientes campos:
-
-      - **Nombre del Grupo**: Ingresa el nombre del grupo. Este campo es obligatorio.
-      - **Descripción**: Ingresa una descripción del grupo (opcional). Aquí puedes proporcionar información adicional sobre el grupo.
-
-   4. Revisa la información ingresada para asegurarte de que esté correcta.
-
-   5. Haz clic en el botón **'Crear Grupo'** para guardar el nuevo grupo.
-
-   6. Si deseas editar un grupo existente, selecciona el grupo desde la lista y haz clic en **'Editar'**. Luego, realiza los cambios necesarios y guarda.
-
-   7. Después de crear o editar el grupo, serás redirigido a la página del grupo donde podrás ver sus detalles.
-
-   8. Si necesitas regresar sin guardar, haz clic en **'Regresar'** para volver a la lista de grupos.
+1. Ve al módulo [Grupos](/grupos) y elige **"Nuevo Grupo"**.
+2. [Haz clic aquí](/grupos/grupo) para ir directo al formulario.
+3. Guarda para finalizar.
 
 --
 
 Instrucciones para Crear un Contratante Físico:
 
-   1. **Verifica que tengas un grupo creado.**  
+   [Haz clic aquí](/contratantes/contratante) para ir directo al formulario.
+
+   1. **Verifica que tengas un grupo creado.**
       Antes de crear un contratante, asegúrate de tener al menos un grupo configurado. Si no tienes un grupo, dirígete a la sección de **Grupos** en la configuración y crea uno. Una vez creado, regresa a esta sección para seleccionar el grupo correspondiente al contratante.
 
    2. En el menú lateral, selecciona **'Clientes'**.
@@ -86,7 +77,9 @@ Instrucciones para Crear un Contratante Físico:
 
 Instrucciones para Crear un Contratante Moral:
 
-   1. **Asegúrate de tener un grupo creado.**  
+   [Haz clic aquí](/contratantes/contratante) para ir directo al formulario.
+
+   1. **Asegúrate de tener un grupo creado.**
       Antes de crear un contratante, asegúrate de que ya tengas un grupo configurado. Si no tienes un grupo creado, ve a la sección de configuración de **Grupos** y crea uno. Luego, regresa a esta sección para seleccionar el grupo correspondiente al contratante.
 
    2. En el menú selecciona **'Contratantes'**.
