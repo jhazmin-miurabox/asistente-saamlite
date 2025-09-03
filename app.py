@@ -34,11 +34,21 @@ vector_db  = FAISS.load_local(
 retriever = vector_db.as_retriever(search_kwargs={"k": 4})  # top-4 trozos relevantes
 llm       = ChatOpenAI(temperature=0, model="gpt-4.1-mini", api_key=OPENAI_API_KEY)
 
+QA_PROMPT = PromptTemplate(
+    input_variables=["context", "question"],
+    template=(
+        "Eres un asistente de seguros. Usa el contexto para responder de forma breve, "
+        "en máximo tres oraciones, y mantén solo la información esencial. "
+        "Incluye enlaces si aparecen en el contexto.\n\nContexto:\n{context}\n\nPregunta: {question}\n\nRespuesta:"
+    ),
+)
+
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
     retriever=retriever,
-    return_source_documents=False   # pon True si quieres devolver las fuentes
+    return_source_documents=False,  # pon True si quieres devolver las fuentes
+    chain_type_kwargs={"prompt": QA_PROMPT},
 )
 
 # Clasificador de tema, usa gpt-3.5-turbo (más rápido y barato)
@@ -61,6 +71,22 @@ def es_saludo(texto: str) -> bool:
     )
     return any(texto.startswith(s) for s in saludos)
 
+
+def es_tema_seguro(texto: str) -> bool:
+    """Detecta palabras clave relacionadas con seguros."""
+    if not texto:
+        return False
+    texto = texto.lower()
+    palabras = (
+        "seguro",
+        "sgiteguros",
+        "póliza",
+        "poliza",
+        "endoso",
+        "cobertura",
+        "siniestro",
+    )
+    return any(p in texto for p in palabras)
 
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
@@ -117,21 +143,29 @@ def ayuda():
     if es_saludo(pregunta):
         return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
 
+    direct = respuesta_crear_poliza(pregunta)
+    if direct:
+        return jsonify({"response": direct}), 200
 
-    # --- Filtro temático ---
-    filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
-    try:
-        filtro_resp = classifier.invoke(filtro_prompt).content.strip().lower()
-        if not filtro_resp.startswith("permitido"):
-            return jsonify({
-                "response": (
-                    "Lo siento, solo puedo ayudarte con temas relacionados a la plataforma, pólizas de seguro, "
-                    "endosos o coberturas. ¿Te gustaría preguntar algo sobre estos temas?"
-                )
-            }), 200
-    except Exception:
-        # Si el filtro falla, NO respondas la pregunta por seguridad
-        return jsonify({"response": "Ocurrió un error en el filtro de temas. Intenta de nuevo."}), 500
+    permitido = es_tema_seguro(pregunta)
+
+    if not permitido:
+        # --- Filtro temático con LLM ---
+        filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
+        try:
+            filtro_resp = classifier.invoke(filtro_prompt).content.strip().lower()
+            permitido = filtro_resp.startswith("permitido")
+        except Exception:
+            return jsonify({"response": "Ocurrió un error en el filtro de temas. Intenta de nuevo."}), 500
+
+    if not permitido:
+        return jsonify({
+            "response": (
+                "Lo siento, solo puedo ayudarte con temas relacionados a la plataforma, pólizas de seguro, "
+                "endosos o coberturas. ¿Te gustaría preguntar algo sobre estos temas?"
+            )
+        }), 200
+
 
     # --- Si sí es permitido, consulta el vectorstore ---
     try:
