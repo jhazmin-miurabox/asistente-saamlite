@@ -121,7 +121,7 @@ def ayuda():
     # --- Filtro temático ---
     filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
     try:
-        filtro_resp = classifier.predict(filtro_prompt).strip().lower()
+        filtro_resp = classifier.invoke(filtro_prompt).content.strip().lower()
         if not filtro_resp.startswith("permitido"):
             return jsonify({
                 "response": (
@@ -138,12 +138,12 @@ def ayuda():
         result = qa_chain({"query": pregunta})
         respuesta = result.get("result", "").strip()
         if not respuesta:
-            respuesta = llm.predict(pregunta).strip()
+            respuesta = llm.invoke(pregunta).content.strip()
         return jsonify({"response": respuesta})
     except Exception:
         try:
             # Fallback directo al modelo si falla el retriever
-            return jsonify({"response": llm.predict(pregunta).strip()})
+            return jsonify({"response": llm.invoke(pregunta).content.strip()})
         except Exception as inner_e:
             return jsonify({"response": f"Ocurrió un error al procesar la solicitud: {str(inner_e)}"}), 500
 
