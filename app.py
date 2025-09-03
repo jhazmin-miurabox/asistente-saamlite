@@ -45,6 +45,40 @@ qa_chain = RetrievalQA.from_chain_type(
 classifier = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
 
 
+def es_saludo(texto: str) -> bool:
+    """Detecta si el texto es un saludo simple."""
+    if not texto:
+        return False
+    texto = texto.strip().lower()
+    saludos = (
+        "hola",
+        "buenos dias",
+        "buenos días",
+        "buenas tardes",
+        "buenas noches",
+        "hi",
+        "hello",
+    )
+    return any(texto.startswith(s) for s in saludos)
+
+
+def es_tema_seguro(texto: str) -> bool:
+    """Detecta palabras clave relacionadas con seguros."""
+    if not texto:
+        return False
+    texto = texto.lower()
+    palabras = (
+        "seguro",
+        "seguros",
+        "póliza",
+        "poliza",
+        "endoso",
+        "cobertura",
+        "siniestro",
+    )
+    return any(p in texto for p in palabras)
+
+
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
     template="""
@@ -97,23 +131,41 @@ def ayuda():
     if not pregunta:
         return jsonify({"response": "Por favor, proporciona una pregunta válida."}), 400
 
- 
-    # --- Filtro temático ---
-    filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
-    try:
-        filtro_resp = classifier.predict(filtro_prompt).strip().lower()
-        if filtro_resp != "permitido":
-            return jsonify({"response": "Lo siento, solo puedo ayudarte con temas relacionados a la plataforma, pólizas de seguro, endosos o coberturas. ¿Te gustaría preguntar algo sobre estos temas?"}), 200
-    except Exception as e:
-        # Si el filtro falla, NO respondas la pregunta por seguridad
-        return jsonify({"response": "Ocurrió un error en el filtro de temas. Intenta de nuevo."}), 500
+    if es_saludo(pregunta):
+        return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
+
+    permitido = es_tema_seguro(pregunta)
+
+    if not permitido:
+        # --- Filtro temático con LLM ---
+        filtro_prompt = ALLOWED_TOPICS_PROMPT.format(question=pregunta)
+        try:
+            filtro_resp = classifier.invoke(filtro_prompt).content.strip().lower()
+            permitido = filtro_resp.startswith("permitido")
+        except Exception:
+            return jsonify({"response": "Ocurrió un error en el filtro de temas. Intenta de nuevo."}), 500
+
+    if not permitido:
+        return jsonify({
+            "response": (
+                "Lo siento, solo puedo ayudarte con temas relacionados a la plataforma, pólizas de seguro, "
+                "endosos o coberturas. ¿Te gustaría preguntar algo sobre estos temas?"
+            )
+        }), 200
 
     # --- Si sí es permitido, consulta el vectorstore ---
     try:
         result = qa_chain({"query": pregunta})
-        return jsonify({"response": result["result"].strip()})
-    except Exception as e:
-        return jsonify({"response": f"Ocurrió un error al procesar la solicitud: {str(e)}"}), 500
+        respuesta = result.get("result", "").strip()
+        if not respuesta:
+            respuesta = llm.invoke(pregunta).content.strip()
+        return jsonify({"response": respuesta})
+    except Exception:
+        try:
+            # Fallback directo al modelo si falla el retriever
+            return jsonify({"response": llm.invoke(pregunta).content.strip()})
+        except Exception as inner_e:
+            return jsonify({"response": f"Ocurrió un error al procesar la solicitud: {str(inner_e)}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
