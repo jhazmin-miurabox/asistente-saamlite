@@ -14,8 +14,8 @@ https://saam.digital/
 
 
 Guía rápida para crear una póliza:
-1. Ve a [Pólizas](/polizas) y elige **"Nueva Póliza"**.
-2. Captura contratante, vigencia y aseguradora.
+1. Ve al módulo [Pólizas](/polizas) y elige **"Nueva Póliza"**.
+2. [Haz clic aquí](http://pruebas.localhost:3000/formulario-polizas) para ir directo al formulario.
 3. Guarda para finalizar.
 
 --

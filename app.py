@@ -89,6 +89,19 @@ def es_tema_seguro(texto: str) -> bool:
     return any(p in texto for p in palabras)
 
 
+def respuesta_crear_poliza(texto: str) -> str:
+    """Devuelve una respuesta breve con enlace para crear pólizas."""
+    if not texto:
+        return ""
+    t = texto.lower()
+    if "crear" in t and ("póliza" in t or "poliza" in t):
+        return (
+            "Para crear una póliza ve al módulo de Pólizas y haz clic en 'Nueva Póliza'. "
+            "Haz clic aquí para ir directo al formulario: http://pruebas.localhost:3000/formulario-polizas"
+        )
+    return ""
+
+
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
     template="""
@@ -143,6 +156,10 @@ def ayuda():
 
     if es_saludo(pregunta):
         return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
+
+    direct = respuesta_crear_poliza(pregunta)
+    if direct:
+        return jsonify({"response": direct}), 200
 
     permitido = es_tema_seguro(pregunta)
 
