@@ -89,6 +89,32 @@ def es_tema_seguro(texto: str) -> bool:
     return any(p in texto for p in palabras)
 
 
+
+def respuesta_crear_endoso(texto: str):
+    """Proporciona una respuesta directa si el usuario pregunta cómo crear un endoso."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    claves = (
+        "crear endoso",
+        "crear un endoso",
+        "nuevo endoso",
+        "generar endoso",
+        "alta de endoso",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para crear un endoso, primero abre la póliza vigente y en la sección Opciones selecciona "
+            "\"Crear Endoso\". Luego, elige el tipo de endoso (A, B o D), selecciona el concepto, "
+            "define la vigencia, completa el formulario correspondiente y, si aplica, genera los recibos o notas "
+            "de crédito. Finalmente, revisa los datos y guarda el endoso para que se aplique en la póliza."
+        )
+
+    return None
+
+
 def respuesta_crear_poliza(texto: str):
     """Proporciona una respuesta directa si el usuario pregunta cómo crear una póliza."""
     if not texto:
@@ -114,6 +140,122 @@ def respuesta_crear_poliza(texto: str):
         )
 
     return None
+
+
+
+def respuesta_crear_grupo(texto: str):
+    """Responde con pasos para crear un grupo."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    claves = (
+        "crear grupo",
+        "crear un grupo",
+        "nuevo grupo",
+        "alta de grupo",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para crear un grupo:\n"
+            "1. En el menú lateral, selecciona 'Grupos'.\n"
+            "2. Haz clic en 'Nuevo Grupo' y completa nombre y descripción.\n"
+            "3. Revisa la información y guarda para finalizar."
+        )
+
+    return None
+
+
+def respuesta_crear_contratante_fisico(texto: str):
+    """Responde cómo crear un contratante físico."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    if "crear" not in pregunta:
+        return None
+
+    claves = (
+        "contratante fisico",
+        "contratante físico",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para crear un contratante físico:\n"
+            "1. Ve a Clientes > Contratantes y selecciona 'Nuevo Contratante'.\n"
+            "2. Elige tipo Físico y captura nombre, apellidos, fecha de nacimiento, género y RFC.\n"
+            "3. Añade correo, teléfono y direcciones si aplica, luego guarda."
+        )
+
+    return None
+
+
+def respuesta_crear_contratante_moral(texto: str):
+    """Responde cómo crear un contratante moral."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    if "crear" not in pregunta:
+        return None
+
+    if "contratante" in pregunta and "moral" in pregunta:
+        return (
+            "Para crear un contratante moral:\n"
+            "1. Ve a Clientes > Contratantes y elige 'Nuevo Contratante'.\n"
+            "2. Selecciona tipo Moral y captura nombre de la empresa, fecha de constitución y RFC.\n"
+            "3. Completa datos de contacto y direcciones, luego guarda."
+        )
+
+    return None
+
+
+def respuesta_crear_recibos(texto: str):
+    """Responde cómo generar recibos de póliza o endoso."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    claves = (
+        "crear recibo",
+        "crear recibos",
+        "generar recibo",
+        "generar recibos",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para generar recibos:\n"
+            "1. Dentro del formulario de póliza o endoso, abre la sección 'Recibos'.\n"
+            "2. Captura prima neta, descuentos, RPF, derecho e IVA.\n"
+            "3. Selecciona la frecuencia de pago y usa 'Generar Primer Recibo' y luego 'Calcular y Generar Recibos'."
+        )
+
+    return None
+
+
+def respuesta_donde_ver(texto: str):
+    """Responde dónde ver distintos elementos en la plataforma."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    if "donde ver" not in pregunta and "dónde ver" not in pregunta:
+        return None
+
+    if "poliza" in pregunta or "póliza" in pregunta:
+        return "Puedes ver tus pólizas en el módulo Pólizas: http://pruebas.localhost:3000/polizas"
+    if "grupo" in pregunta:
+        return "Selecciona 'Grupos' en el menú lateral para verlos."
+    if "contratante" in pregunta:
+        return "Ve a Clientes > Contratantes en el menú para consultar la lista."
+    if "recibo" in pregunta:
+        return "Abre la póliza o endoso y entra a la sección 'Recibos' para verlos."
+
+    return None
+
 
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
@@ -170,9 +312,18 @@ def ayuda():
     if es_saludo(pregunta):
         return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
 
-    direct = respuesta_crear_poliza(pregunta)
-    if direct:
-        return jsonify({"response": direct}), 200
+    for handler in (
+        respuesta_crear_endoso,
+        respuesta_crear_poliza,
+        respuesta_crear_grupo,
+        respuesta_crear_contratante_fisico,
+        respuesta_crear_contratante_moral,
+        respuesta_crear_recibos,
+        respuesta_donde_ver,
+    ):
+        direct = handler(pregunta)
+        if direct:
+            return jsonify({"response": direct}), 200
 
     permitido = es_tema_seguro(pregunta)
 
