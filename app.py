@@ -88,6 +88,33 @@ def es_tema_seguro(texto: str) -> bool:
     )
     return any(p in texto for p in palabras)
 
+
+def respuesta_crear_poliza(texto: str):
+    """Proporciona una respuesta directa si el usuario pregunta cómo crear una póliza."""
+    if not texto:
+        return None
+
+    pregunta = texto.lower()
+    claves = (
+        "crear poliza",
+        "crear póliza",
+        "nueva poliza",
+        "nueva póliza",
+        "alta de poliza",
+        "alta de póliza",
+    )
+
+    if any(c in pregunta for c in claves):
+        return (
+            "Para crear una póliza:\n"
+            "1. Ve al módulo Pólizas y elige 'Nueva Póliza'.\n"
+            "2. Completa el formulario correspondiente.\n"
+            "3. Guarda para finalizar. También puedes ir al formulario en "
+            "http://pruebas.localhost:3000/formulario-polizas"
+        )
+
+    return None
+
 ALLOWED_TOPICS_PROMPT = PromptTemplate(
     input_variables=["question"],
     template="""
