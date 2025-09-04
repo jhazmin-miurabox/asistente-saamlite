@@ -32,6 +32,7 @@ vector_db  = FAISS.load_local(
 )
 
 retriever = vector_db.as_retriever(search_kwargs={"k": 4})  # top-4 trozos relevantes
+
 llm       = ChatOpenAI(temperature=0, model="gpt-4.1-mini", api_key=OPENAI_API_KEY)
 
 QA_PROMPT = PromptTemplate(
@@ -53,6 +54,66 @@ qa_chain = RetrievalQA.from_chain_type(
 
 # Clasificador de tema, usa gpt-3.5-turbo (más rápido y barato)
 classifier = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
+
+
+def es_saludo(texto: str) -> bool:
+    """Detecta si el texto es un saludo simple."""
+    if not texto:
+        return False
+    texto = texto.strip().lower()
+    saludos = (
+        "hola",
+        "buenos dias",
+        "buenos días",
+        "buenas tardes",
+        "buenas noches",
+        "hi",
+        "hello",
+    )
+    return any(texto.startswith(s) for s in saludos)
+
+
+def es_tema_seguro(texto: str) -> bool:
+    """Detecta palabras clave relacionadas con seguros."""
+    if not texto:
+        return False
+    texto = texto.lower()
+    palabras = (
+        "seguro",
+        "seguros",
+        "póliza",
+        "poliza",
+        "endoso",
+        "cobertura",
+        "siniestro",
+    )
+    return any(p in texto for p in palabras)
+
+
+def respuesta_crear_poliza(texto: str) -> str:
+    """Devuelve una respuesta breve con enlace para crear pólizas."""
+    if not texto:
+        return ""
+    t = texto.lower()
+    if "crear" in t and ("póliza" in t or "poliza" in t):
+        return (
+            "Para crear una póliza ve al módulo de Pólizas y haz clic en 'Nueva Póliza'. "
+            "Haz clic aquí para ir directo al formulario: /formulario-polizas"
+        )
+    return ""
+
+
+def respuesta_crear_grupo(texto: str) -> str:
+    """Devuelve una respuesta breve con enlace para crear grupos."""
+    if not texto:
+        return ""
+    t = texto.lower()
+    if "crear" in t and "grupo" in t:
+        return (
+            "Para crear un grupo ve al módulo de Grupos y haz clic en 'Nuevo Grupo'. "
+            "Haz clic aquí para ir directo al formulario: /grupos/grupo"
+        )
+    return ""
 
 
 def es_saludo(texto: str) -> bool:
@@ -303,6 +364,7 @@ def index():
 
 @app.route("/ayuda", methods=["POST"])
 def ayuda():
+
     data = request.get_json(force=True, silent=True) or {}
     pregunta = data.get("question")
 
@@ -312,18 +374,11 @@ def ayuda():
     if es_saludo(pregunta):
         return jsonify({"response": "¡Hola! ¿En qué puedo ayudarte?"}), 200
 
-    for handler in (
-        respuesta_crear_endoso,
-        respuesta_crear_poliza,
-        respuesta_crear_grupo,
-        respuesta_crear_contratante_fisico,
-        respuesta_crear_contratante_moral,
-        respuesta_crear_recibos,
-        respuesta_donde_ver,
-    ):
-        direct = handler(pregunta)
-        if direct:
-            return jsonify({"response": direct}), 200
+    direct = respuesta_crear_poliza(pregunta)
+    if not direct:
+        direct = respuesta_crear_grupo(pregunta)
+    if direct:
+        return jsonify({"response": direct}), 200
 
     permitido = es_tema_seguro(pregunta)
 
@@ -343,7 +398,6 @@ def ayuda():
                 "endosos o coberturas. ¿Te gustaría preguntar algo sobre estos temas?"
             )
         }), 200
-
 
     # --- Si sí es permitido, consulta el vectorstore ---
     try:
